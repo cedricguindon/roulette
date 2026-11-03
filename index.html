@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111a16">
+    <title>Roulette Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" type="module"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Roulette Tracker home">
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <span>ROULETTE<span class="brand-light"> TRACKER</span></span>
+        </a>
+        <div class="table-label"><span class="live-dot"></span> EUROPEAN TABLE <span class="label-divider">/</span> SINGLE ZERO</div>
+      </header>
+
+      <section class="intro">
+        <div>
+          <p class="eyebrow">YOUR SESSION, AT A GLANCE</p>
+          <h1>Spin <span>tracker</span></h1>
+          <p class="intro-copy">Record each result and keep an eye on how your session is unfolding.</p>
+        </div>
+        <div class="spin-total">
+          <span class="spin-total-label">TOTAL SPINS</span>
+          <strong id="spin-count">0</strong>
+        </div>
+      </section>
+
+      <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
+
+      <section class="panel history-panel" aria-labelledby="history-heading">
+        <div class="panel-heading history-heading">
+          <div>
+            <p class="eyebrow">YOUR SESSION</p>
+            <h2 id="history-heading">Recent numbers <span class="history-limit">LAST 25</span></h2>
+          </div>
+          <div class="history-actions">
+            <button class="text-button" id="undo-button" type="button" disabled>↶ <span>Undo last</span></button>
+            <button class="text-button clear-button" id="clear-button" type="button" disabled>Clear history</button>
+          </div>
+        </div>
+        <div class="history-list" id="history-list" aria-live="polite">
+          <p class="empty-state">Your spins will appear here. Add a number to get started.</p>
+        </div>
+      </section>
+
+      <div class="dashboard">
+        <section class="panel table-panel" aria-labelledby="table-heading">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">EUROPEAN WHEEL</p>
+              <h2 id="table-heading">Add a number</h2>
+            </div>
+            <span class="heading-hint">Select the result of the spin</span>
+          </div>
+
+          <div class="board-cues">
+            <div class="dozen-cues" aria-label="Dozen groups">
+              <span>1st dozen · 1–12</span>
+              <span>2nd dozen · 13–24</span>
+              <span>3rd dozen · 25–36</span>
+            </div>
+            <div class="roulette-board" id="roulette-board" aria-label="Roulette number table">
+              <button class="number-button green zero-button" type="button" data-number="0" aria-label="Add 0, green; not in a dozen or column">0</button>
+              <div class="number-grid" id="number-grid"></div>
+              <div class="column-cues" aria-label="Roulette columns">
+                <span>3rd</span>
+                <span>2nd</span>
+                <span>1st</span>
+              </div>
+            </div>
+          </div>
+          <div class="board-key">
+            <span><i class="key-dot red-key"></i> Red</span>
+            <span><i class="key-dot black-key"></i> Black</span>
+            <span><i class="key-dot green-key"></i> Green</span>
+            <span class="cue-key"><i class="cue-swatch dozen-swatch"></i> Dozens group 12 numbers</span>
+            <span class="cue-key"><i class="cue-swatch column-swatch"></i> Column number at right</span>
+          </div>
+          <div class="streak-threshold">
+            <label for="streak-threshold-input">
+              Color, parity &amp; range alert threshold
+              <output id="streak-threshold-value" for="streak-threshold-input">2%</output>
+            </label>
+            <input id="streak-threshold-input" type="range" min="0" max="50" step="0.1" value="2">
+            <label for="absent-outcome-threshold-input">
+              Dozens &amp; columns alert threshold
+              <output id="absent-outcome-threshold-value" for="absent-outcome-threshold-input">2%</output>
+            </label>
+            <input id="absent-outcome-threshold-input" type="range" min="0" max="50" step="0.1" value="2">
+            <div class="bankroll-summary">
+              <label class="current-cash-label" for="current-cash-input">
+                Current cash
+                <span class="current-cash-control">
+                  <span aria-hidden="true">$</span>
+                  <input id="current-cash-input" type="number" min="0" max="100000" step="0.01" value="160" inputmode="decimal">
+                </span>
+              </label>
+              <div class="bankroll-stat">
+                <span>Total bet</span>
+                <strong id="total-wagered-value">$0.00</strong>
+              </div>
+              <div class="bankroll-stat">
+                <span>Gains</span>
+                <strong id="gains-value">$0.00</strong>
+              </div>
+              <div class="bankroll-stat">
+                <span>Losses</span>
+                <strong id="losses-value">$0.00</strong>
+              </div>
+            </div>
+            <p class="starting-cash-note">Bets shown in alerts are paper bets placed on the next spin. Wins and losses update cash automatically; combined bets are scaled to fit your available cash.</p>
+          </div>
+          <section class="bet-alerts" aria-label="Bet alerts">
+            <p class="eyebrow">BET ALERTS</p>
+            <p class="threshold-alert" id="color-streak-alert" role="status" aria-live="polite" hidden></p>
+            <p class="threshold-alert" id="parity-streak-alert" role="status" aria-live="polite" hidden></p>
+            <p class="threshold-alert" id="range-streak-alert" role="status" aria-live="polite" hidden></p>
+            <p class="threshold-alert" id="alternating-color-streak-alert" role="status" aria-live="polite" hidden></p>
+            <p class="threshold-alert" id="alternating-parity-streak-alert" role="status" aria-live="polite" hidden></p>
+            <p class="threshold-alert" id="alternating-range-streak-alert" role="status" aria-live="polite" hidden></p>
+            <div id="dozen-bet-alerts" aria-live="polite"></div>
+            <div id="column-bet-alerts" aria-live="polite"></div>
+          </section>
+        </section>
+
+        <aside class="panel insights-panel" aria-labelledby="insights-heading">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">SESSION BREAKDOWN</p>
+              <h2 id="insights-heading">Outside bets</h2>
+            </div>
+            <span class="live-label"><span class="live-dot"></span> LIVE</span>
+          </div>
+          <p class="panel-description">Results so far, grouped by bet type.</p>
+          <div class="stat-groups" id="stat-groups"></div>
+          <p class="insight-note">Past results don't predict future spins.</p>
+          <section class="streak-probability" aria-labelledby="streak-heading">
+            <div class="streak-heading">
+              <div>
+                <p class="eyebrow">BASED ON YOUR LATEST RESULTS</p>
+                <h3 id="streak-heading">Streak probability</h3>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Color</span>
+              <p class="streak-current" id="color-streak">Add a spin to start tracking a color streak.</p>
+              <div class="streak-result">
+                <span id="color-streak-label">Chance of the extended color streak</span>
+                <strong id="color-streak-probability">—</strong>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Parity</span>
+              <p class="streak-current" id="parity-streak">Add a spin to start tracking an odd/even streak.</p>
+              <div class="streak-result">
+                <span id="parity-streak-label">Chance of the extended parity streak</span>
+                <strong id="parity-streak-probability">—</strong>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Range</span>
+              <p class="streak-current" id="range-streak">Add a spin to start tracking a low/high streak.</p>
+              <div class="streak-result">
+                <span id="range-streak-label">Chance of the extended range streak</span>
+                <strong id="range-streak-probability">—</strong>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Alternating Color</span>
+              <p class="streak-current" id="alternating-color-streak">Add spins to start tracking alternating colors.</p>
+              <div class="streak-result">
+                <span id="alternating-color-streak-label">Chance of the extended alternating color pattern</span>
+                <strong id="alternating-color-streak-probability">—</strong>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Alternating Parity</span>
+              <p class="streak-current" id="alternating-parity-streak">Add spins to start tracking alternating parity.</p>
+              <div class="streak-result">
+                <span id="alternating-parity-streak-label">Chance of the extended alternating parity pattern</span>
+                <strong id="alternating-parity-streak-probability">—</strong>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Alternating Range</span>
+              <p class="streak-current" id="alternating-range-streak">Add spins to start tracking alternating range.</p>
+              <div class="streak-result">
+                <span id="alternating-range-streak-label">Chance of the extended alternating range pattern</span>
+                <strong id="alternating-range-streak-probability">—</strong>
+              </div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Dozens</span>
+              <div class="outcome-tracking" id="dozen-outcomes"></div>
+            </div>
+            <div class="streak-group" aria-live="polite">
+              <span class="streak-type">Columns</span>
+              <div class="outcome-tracking" id="column-outcomes"></div>
+            </div>
+            <p class="streak-note">Color, parity, and range show the chance of their active streak extending; zero continues the previous nonzero outcome. Alternating streaks track repeated switches between the two outcomes. Dozens and columns track how many spins each outcome has missed since its last hit; zero counts as a miss for all of them. These alerts don't predict the next spin.</p>
+          </section>
+        </aside>
+      </div>
+
+      <footer class="footer">
+        <span>European roulette · 0–36</span>
+        <span>History is saved on this device</span>
+      </footer>
+    </main>
+  </body>
+</html>
